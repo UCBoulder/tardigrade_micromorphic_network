@@ -30,6 +30,10 @@ namespace microNet{
 
     errorOut assembleStiffness( const floatMatrix &params, floatVector &stiffnessMatrix );
 
+    errorOut computeStress( const floatVector &deformationGradient, const floatVector &microDeformation,
+                            const floatVector &gradientMicroDeformation, const floatMatrix &params,
+                            floatVector &PK2Stress, floatVector &SIGMA, floatVector &higherOrderStress );
+
 }
 
 #endif
