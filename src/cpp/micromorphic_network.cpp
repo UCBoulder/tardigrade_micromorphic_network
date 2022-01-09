@@ -8,17 +8,17 @@
 
 #include<micromorphic_network.h>
 
-namespace micronet{
+namespace microNet{
 
-    errorOut compute_energy( const floatVector &deformationGradient, const floatVecotr &microDeformation,
-                             const floatVector &gradientMicroDeformation, const floatMatrix &params,
-                             floatType energy ){
+    errorOut computeEnergy( const floatVector &deformationGradient, const floatVector &microDeformation,
+                            const floatVector &gradientMicroDeformation, const floatMatrix &params,
+                            floatType &energy ){
         /*!
          * Compute the energy of the micromorphic network.
          * 
-         * \f$\left(\psi \rho\right) = \frac{1}{2} E_{IJ}^{\chi} \mathbb{C}_{IJKL} E_{KL}^{\chi} + \sum_{n=1}^N \frac{1}{4} k^n \left[ \sqrt{c_i c_i} - \sqrt{C_I C_I} \right]^2\f$
+         * \f$\left(\psi \rho\right) = \frac{1}{2} E_{IJ}^{\chi} C_{IJKL} E_{KL}^{\chi} + \sum_{n=1}^N \frac{1}{4} k^n \left[ \sqrt{c_i c_i} - \sqrt{C_I C_I} \right]^2\f$
          * 
-         * Where $\mathbb{C}$ is the stiffness matrix of the central mass, and the vectors which describe the
+         * Where $C$ is the stiffness matrix of the central mass, and the vectors which describe the
          * spring in the current and reference configurations are
          * 
          * \f$c_i = F_{iI} dX_I + \left( \chi_{iI} + \chi_{iI,J} dX_J \right) \Xi_I^2 - \chi_{iI} \Xi_I^1 \f$
@@ -44,7 +44,8 @@ namespace micronet{
                                                                        _spatialDimension, _spatialDimension );
 
         // Compute the stiffness matrix of the central portion
-        errorOut error assemble_stiffness( params, C_center );
+        floatVector C_center;
+        errorOut error = assembleStiffness( params, C_center );
 
         if ( error ){
 
@@ -54,6 +55,7 @@ namespace micronet{
 
         }
 
+        floatVector microStrain;
         error = constitutiveTools::computeGreenLagrangeStrain( microDeformation, microStrain );
 
         if ( error ){
@@ -88,18 +90,19 @@ namespace micronet{
 
             if ( p->size( ) != 10 ){
 
-                std::ostringstream message = "The parameters for the " << p - params.begin( ) + 1
-                                          << "th spring has a size of " << p->size( ) << " and 10 values are required.";
+                std::ostringstream message;
+                message << "The parameters for the " << ( int )( p - params.begin( ) ) + 1
+                        << "th spring has a size of " << p->size( ) << " and 10 values are required.";
 
                 return new errorNode( __func__, message.str( ) );
 
             }
 
             // Extract the parameters
-            floatType kn     = p[ 0 ];
-            floatVector dX   = { p[ 1 ], p[ 2 ], p[ 3 ] };
-            floatVector Xi_1 = { p[ 4 ], p[ 5 ], p[ 6 ] };
-            floatVector Xi_2 = { p[ 7 ], p[ 8 ], p[ 9 ] };
+            floatType kn     = ( *p )[ 0 ];
+            floatVector dX   = { ( *p )[ 1 ], ( *p )[ 2 ], ( *p )[ 3 ] };
+            floatVector Xi_1 = { ( *p )[ 4 ], ( *p )[ 5 ], ( *p )[ 6 ] };
+            floatVector Xi_2 = { ( *p )[ 7 ], ( *p )[ 8 ], ( *p )[ 9 ] };
 
             floatVector dx( _spatialDimension, 0 );
             floatVector xi_1( _spatialDimension, 0 );
@@ -140,7 +143,7 @@ namespace micronet{
         /*!
          * Assemble the stiffness matrix of the central portion. Current assumption is isotropy.
          * 
-         * \f$ \mathbb{C}_{IJKL} = \lambda \delta_{IJ} \delta_{KL} + \mu \left( \delta_{IK} \delta_{JL} + \delta_{IL} \delta_{JK} \right) \f$
+         * \f$ C_{IJKL} = \lambda \delta_{IJ} \delta_{KL} + \mu \left( \delta_{IK} \delta_{JL} + \delta_{IL} \delta_{JK} \right) \f$
          * 
          * \param &params: The parameter value matrix.
          * \param &stiffnessMatrix: The resulting stiffness matrix of the central section.
@@ -163,7 +166,7 @@ namespace micronet{
         floatVector eye( _spatialDimension * _spatialDimension, 0 );
         vectorTools::eye( eye );
 
-        stiffnessMatrix = floatMatrix( _spatialDimension * _spatialDimension, floatVector( _spatialDimension * _spatialDimension, 0 ) );
+        stiffnessMatrix = floatVector( _spatialDimension * _spatialDimension * _spatialDimension * _spatialDimension, 0 );
 
         for ( unsigned int I = 0; I < _spatialDimension; I++ ){
 
