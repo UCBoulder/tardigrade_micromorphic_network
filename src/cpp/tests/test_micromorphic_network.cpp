@@ -159,4 +159,156 @@ BOOST_AUTO_TEST_CASE( test_computeStress ){
 
     BOOST_CHECK( vectorTools::fuzzyEquals( M_result, M_answer ) );
 
+    floatMatrix dPK2dF,   dPK2dchi,   dPK2dgrad_chi,
+                dSIGMAdF, dSIGMAdchi, dSIGMAdgrad_chi,
+                dMdF,     dMdchi,     dMdgrad_chi;
+
+    PK2_result.clear( );
+    SIGMA_result.clear( );
+    M_result.clear( );
+
+    error = microNet::computeStress( F, chi, grad_chi, params, PK2_result, SIGMA_result, M_result,
+                                     dPK2dF,   dPK2dchi,   dPK2dgrad_chi,
+                                     dSIGMAdF, dSIGMAdchi, dSIGMAdgrad_chi,
+                                     dMdF,     dMdchi,     dMdgrad_chi );
+
+    BOOST_CHECK( !error );
+
+    BOOST_CHECK( vectorTools::fuzzyEquals( PK2_result, PK2_answer ) );
+
+    BOOST_CHECK( vectorTools::fuzzyEquals( SIGMA_result, SIGMA_answer ) );
+
+    BOOST_CHECK( vectorTools::fuzzyEquals( M_result, M_answer ) );
+
+    floatType eps = 1e-6;
+
+    for ( unsigned int i = 0; i < F.size( ); i++ ){
+
+        floatVector delta( F.size( ), 0 );
+        delta[ i ] += eps * std::fabs( F[ i ] ) + eps;
+
+        floatVector PK2_p,   PK2_m;
+        floatVector SIGMA_p, SIGMA_m;
+        floatVector M_p,     M_m;
+
+        error = microNet::computeStress( F + delta, chi, grad_chi, params, PK2_p, SIGMA_p, M_p );
+
+        BOOST_CHECK( !error );
+
+        error = microNet::computeStress( F - delta, chi, grad_chi, params, PK2_m, SIGMA_m, M_m );
+
+        BOOST_CHECK( !error );
+
+        floatVector grad_col = ( PK2_p - PK2_m ) / ( 2 * delta[ i ] );
+
+        for ( unsigned int j = 0; j < PK2_answer.size( ); j++ ){
+
+            BOOST_CHECK( vectorTools::fuzzyEquals( grad_col[ j ], dPK2dF[ j ][ i ] ) );
+
+        }
+
+        grad_col = ( SIGMA_p - SIGMA_m ) / ( 2 * delta[ i ] );
+
+        for ( unsigned int j = 0; j < SIGMA_answer.size( ); j++ ){
+
+            BOOST_CHECK( vectorTools::fuzzyEquals( grad_col[ j ], dSIGMAdF[ j ][ i ] ) );
+
+        }
+
+        grad_col = ( M_p - M_m ) / ( 2 * delta[ i ] );
+
+        for ( unsigned int j = 0; j < M_answer.size( ); j++ ){
+
+            BOOST_CHECK( vectorTools::fuzzyEquals( grad_col[ j ], dMdF[ j ][ i ] ) );
+
+        }
+
+    }
+
+    for ( unsigned int i = 0; i < chi.size( ); i++ ){
+
+        floatVector delta( chi.size( ), 0 );
+        delta[ i ] += eps * std::fabs( chi[ i ] ) + eps;
+
+        floatVector PK2_p,   PK2_m;
+        floatVector SIGMA_p, SIGMA_m;
+        floatVector M_p,     M_m;
+
+        error = microNet::computeStress( F, chi + delta, grad_chi, params, PK2_p, SIGMA_p, M_p );
+
+        BOOST_CHECK( !error );
+
+        error = microNet::computeStress( F, chi - delta, grad_chi, params, PK2_m, SIGMA_m, M_m );
+
+        BOOST_CHECK( !error );
+
+        floatVector grad_col = ( PK2_p - PK2_m ) / ( 2 * delta[ i ] );
+
+        for ( unsigned int j = 0; j < PK2_answer.size( ); j++ ){
+
+            BOOST_CHECK( vectorTools::fuzzyEquals( grad_col[ j ], dPK2dchi[ j ][ i ] ) );
+
+        }
+
+        grad_col = ( SIGMA_p - SIGMA_m ) / ( 2 * delta[ i ] );
+
+        for ( unsigned int j = 0; j < SIGMA_answer.size( ); j++ ){
+
+            BOOST_CHECK( vectorTools::fuzzyEquals( grad_col[ j ], dSIGMAdchi[ j ][ i ] ) );
+
+        }
+
+        grad_col = ( M_p - M_m ) / ( 2 * delta[ i ] );
+
+        for ( unsigned int j = 0; j < M_answer.size( ); j++ ){
+
+            BOOST_CHECK( vectorTools::fuzzyEquals( grad_col[ j ], dMdchi[ j ][ i ] ) );
+
+        }
+
+    }
+
+    for ( unsigned int i = 0; i < grad_chi.size( ); i++ ){
+
+        floatVector delta( grad_chi.size( ), 0 );
+        delta[ i ] += eps * std::fabs( grad_chi[ i ] ) + eps;
+
+        floatVector PK2_p,   PK2_m;
+        floatVector SIGMA_p, SIGMA_m;
+        floatVector M_p,     M_m;
+
+        error = microNet::computeStress( F, chi, grad_chi + delta, params, PK2_p, SIGMA_p, M_p );
+
+        BOOST_CHECK( !error );
+
+        error = microNet::computeStress( F, chi, grad_chi - delta, params, PK2_m, SIGMA_m, M_m );
+
+        BOOST_CHECK( !error );
+
+        floatVector grad_col = ( PK2_p - PK2_m ) / ( 2 * delta[ i ] );
+
+        for ( unsigned int j = 0; j < PK2_answer.size( ); j++ ){
+
+            BOOST_CHECK( vectorTools::fuzzyEquals( grad_col[ j ], dPK2dgrad_chi[ j ][ i ] ) );
+
+        }
+
+        grad_col = ( SIGMA_p - SIGMA_m ) / ( 2 * delta[ i ] );
+
+        for ( unsigned int j = 0; j < SIGMA_answer.size( ); j++ ){
+
+            BOOST_CHECK( vectorTools::fuzzyEquals( grad_col[ j ], dSIGMAdgrad_chi[ j ][ i ] ) );
+
+        }
+
+        grad_col = ( M_p - M_m ) / ( 2 * delta[ i ] );
+
+        for ( unsigned int j = 0; j < M_answer.size( ); j++ ){
+
+            BOOST_CHECK( vectorTools::fuzzyEquals( grad_col[ j ], dMdgrad_chi[ j ][ i ] ) );
+
+        }
+
+    }
+
 }
