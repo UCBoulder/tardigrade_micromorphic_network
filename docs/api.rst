@@ -14,11 +14,11 @@
 .. _micromorphic_network_source:
 
 micromorphic_network.cpp
-======================
+========================
 
 .. doxygenfile:: micromorphic_network.cpp
 
 micromorphic_network.h
-====================
+======================
 
 .. doxygenfile:: micromorphic_network.h

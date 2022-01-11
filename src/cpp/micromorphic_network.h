@@ -34,6 +34,21 @@ namespace microNet{
                             const floatVector &gradientMicroDeformation, const floatMatrix &params,
                             floatVector &PK2Stress, floatVector &SIGMA, floatVector &higherOrderStress );
 
+    errorOut computeStress( const floatVector &deformationGradient, const floatVector &microDeformation,
+                            const floatVector &gradientMicroDeformation, const floatMatrix &params,
+                            floatVector &PK2Stress, floatVector &SIGMA, floatVector &higherOrderStress,
+                            floatMatrix &dPK2dF,   floatMatrix &dPK2dchi,   floatMatrix &dPK2dgrad_chi,
+                            floatMatrix &dSIGMAdF, floatMatrix &dSIGMAdchi, floatMatrix &dSIGMAdgrad_chi,
+                            floatMatrix &dMdF,     floatMatrix &dMdchi,     floatMatrix &dMdgrad_chi );
+
+    errorOut computeStress( const floatVector &deformationGradient, const floatVector &microDeformation,
+                            const floatVector &gradientMicroDeformation, const floatMatrix &params,
+                            floatVector &PK2Stress, floatVector &SIGMA, floatVector &higherOrderStress,
+                            floatMatrix &dPK2dF,   floatMatrix &dPK2dchi,   floatMatrix &dPK2dgrad_chi,
+                            floatMatrix &dSIGMAdF, floatMatrix &dSIGMAdchi, floatMatrix &dSIGMAdgrad_chi,
+                            floatMatrix &dMdF,     floatMatrix &dMdchi,     floatMatrix &dMdgrad_chi,
+                            bool computeJacobians );
+
 }
 
 #endif
