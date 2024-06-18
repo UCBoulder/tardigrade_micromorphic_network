@@ -14,3 +14,7 @@ Internal Changes
 - Added the calculation of the strain energy (:merge:`1`) By `Nathan Miller`_.
 - Added the stress calculations (:merge:`2`) By `Nathan Miller`_.
 - Added the jacobian calculations (:merge:`3`) By `Nathan Miller`_.
+
+Bug Fixes
+=========
+- Removed trailing whitespace after add_library (:pull:`1`). By `Nathan Miller`_.
